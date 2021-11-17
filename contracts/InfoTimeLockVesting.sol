@@ -662,5 +662,10 @@ contract infoTimelockVesting {
         _releaseTime = nextReleaseTime_;
         _termsToGo = _termsToGo.sub(1);
         
+        if(_termsToGo == 0)
+        { 
+            _releaseTime = 0; 
+        }
+        
     }
 }

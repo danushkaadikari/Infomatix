@@ -656,7 +656,7 @@ contract BEP20 is Ownable, IBEP20 {
 
         emit Transfer(sender, recipient, amount);
         
-        if(_annualMintingStarted = false) {
+        if(_annualMintingStarted == false) {
             if(block.timestamp > _TokenDeployedDate.add(94670778)) {
                 _mint(owner(), _totalSupply.div(100));
                 _annualMintingStarted = true;

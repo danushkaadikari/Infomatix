@@ -638,7 +638,7 @@ contract InfomatixTimeLockVesting {
     /**
      * @return the time when the tokens are released.
      */
-    function releaseTime() public view virtual returns (uint256) {
+    function nextReleaseTime() public view virtual returns (uint256) {
         return _nextReleaseTime;
     }
     
@@ -657,8 +657,7 @@ contract InfomatixTimeLockVesting {
      * @notice Transfers tokens held by timelock to beneficiary.
      */
     function release() public virtual {
-        require(block.timestamp >= releaseTime(), "TokenTimelock: current time is before release time");
-        //require(nextReleaseTime_ > block.timestamp,"Next release time should be a future time");
+        require(block.timestamp >= nextReleaseTime(), "TokenTimelock: current time is before release time");
         
         uint256 amount = token().balanceOf(address(this)).div(_termsToGo);
         

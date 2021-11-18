@@ -649,7 +649,7 @@ contract InfomatixTimeLockVesting {
          return _termsToGo;
      }
      
-     function tokensToReleaseOnNexReleaseDate() public view virtual returns (uint256) {
+     function tokensToBeReleasedOnNexReleaseDate() public view virtual returns (uint256) {
          return token().balanceOf(address(this)).div(_termsToGo);
      }
      

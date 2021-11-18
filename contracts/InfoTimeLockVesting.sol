@@ -589,7 +589,7 @@ library SafeMath {
  * Useful for simple vesting schedules like "advisors get all of their tokens
  * after 1 year".
  */
-contract infoTimelockVesting {
+contract InfomatixTimeLockVesting {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
@@ -600,21 +600,24 @@ contract infoTimelockVesting {
     address private immutable _beneficiary;
 
     // timestamp when token release is enabled
-    uint256 private _releaseTime;
+    uint256 private _nextReleaseTime;
     
     //number of terms periods
     uint256 private _termsToGo;
+    
+    //seconds for a month
+    uint256 constant internal _aMonth = 2629743;
 
     constructor(
         IERC20 token_,
         address beneficiary_,
-        uint256 releaseTime_,
+        uint256 nextReleaseTime_,
         uint256 termsToGo_
     ) {
-        require(releaseTime_ > block.timestamp, "TokenTimelock: release time is before current time");
+        require(nextReleaseTime_ > block.timestamp, "TokenTimelock: release time is before current time");
         _token = token_;
         _beneficiary = beneficiary_;
-        _releaseTime = releaseTime_;
+        _nextReleaseTime = nextReleaseTime_;
         _termsToGo = termsToGo_;
     }
 
@@ -636,7 +639,7 @@ contract infoTimelockVesting {
      * @return the time when the tokens are released.
      */
     function releaseTime() public view virtual returns (uint256) {
-        return _releaseTime;
+        return _nextReleaseTime;
     }
     
     /**
@@ -646,12 +649,16 @@ contract infoTimelockVesting {
          return _termsToGo;
      }
      
+     function tokensToReleaseOnNexReleaseDate() public view virtual returns (uint256) {
+         return token().balanceOf(address(this)).div(_termsToGo);
+     }
+     
     /**
      * @notice Transfers tokens held by timelock to beneficiary.
      */
-    function release(uint256 nextReleaseTime_) public virtual {
+    function release() public virtual {
         require(block.timestamp >= releaseTime(), "TokenTimelock: current time is before release time");
-        require(nextReleaseTime_ > block.timestamp,"Next release time should be a future time");
+        //require(nextReleaseTime_ > block.timestamp,"Next release time should be a future time");
         
         uint256 amount = token().balanceOf(address(this)).div(_termsToGo);
         
@@ -659,12 +666,12 @@ contract infoTimelockVesting {
 
         token().safeTransfer(beneficiary(), amount);
         
-        _releaseTime = nextReleaseTime_;
+        _nextReleaseTime = _nextReleaseTime.add(_aMonth);
         _termsToGo = _termsToGo.sub(1);
         
         if(_termsToGo == 0)
         { 
-            _releaseTime = 0; 
+            _nextReleaseTime = 0; 
         }
         
     }
